@@ -1,5 +1,6 @@
 package kr.co.cm29.homework.repository;
 
+import kr.co.cm29.homework.exception.SoldOutException;
 import kr.co.cm29.homework.model.ProductDto;
 import lombok.RequiredArgsConstructor;
 
@@ -31,5 +32,24 @@ public class OrderRepository {
             }
         }
         return BigDecimal.ZERO;
+    }
+
+    /**
+     * 해당 상품의 재고 수량 빼기
+     */
+    public void subAmount(int productNumber, int amount) throws SoldOutException{
+        int finalAmount = 0;
+        for(ProductDto data : productList){
+            if(data.getProductNumber() == productNumber){
+                finalAmount = data.getAmount()- amount;
+                if(finalAmount < 0){
+                    System.out.println("재고수량 부족!!!!");
+                    throw new SoldOutException();
+                } else {
+                    System.out.println("남은 재고수량 : " + finalAmount);
+                    data.setAmount(finalAmount);
+                }
+            }
+        }
     }
 }

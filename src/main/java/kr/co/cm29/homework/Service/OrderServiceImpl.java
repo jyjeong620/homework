@@ -1,5 +1,6 @@
 package kr.co.cm29.homework.Service;
 
+import kr.co.cm29.homework.exception.SoldOutException;
 import kr.co.cm29.homework.model.ProductDto;
 import kr.co.cm29.homework.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService{
     private final OrderRepository repository;
-
 
     /**
      * Product 데이터를 모두 가져오는 메소드
@@ -31,5 +31,11 @@ public class OrderServiceImpl implements OrderService{
         return repository.findById(productNumber);
     }
 
-
+    /**
+     * 상품번호와 수량을 받아와 해당 상품의 재료수 마이너스
+     */
+    @Override
+    public void findByAmount(int productNumber, int amount) throws SoldOutException {
+        repository.subAmount(productNumber,amount);
+    }
 }
