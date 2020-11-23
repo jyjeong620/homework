@@ -8,7 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,59 +33,83 @@ public class OrderController {
     /**
      * 상품번호, 수량을 입력받아 해당 상품의 가격을 가져와 금액을 계산
      */
-    public BigDecimal findProductNumber() throws SoldOutException{
-        BigDecimal price = BigDecimal.ZERO;
+    public List<ProductDto> findProductNumber() throws SoldOutException{
+        List<ProductDto> orders = new ArrayList<>();
         scan = new Scanner(System.in);
         String productNumber;
         String amount;
-        boolean shopping = true;
 
-        while(shopping){
+        while(true){
             System.out.print("상품번호 : ");
             productNumber = scan.nextLine();
             System.out.print("수량 : ");
             amount = scan.nextLine();
+
             if(productNumber.equals(" ") && amount.equals(" ")){
                 log.debug("입력값 없음");
-                shopping = false;
-            } else if(productNumber.isEmpty() || amount.isEmpty()){
+                return calculateOrders(orders);
+            } else if(productNumber.isEmpty() || amount.isEmpty()
+                    || !productNumber.matches("^[0-9]*$") || !amount.matches("^[0-9]*$")){
                 System.out.println("잘못입력하셨습니다.");
             } else {
-                price = calculatePrice(Integer.parseInt(productNumber), Integer.parseInt(amount));
+                orders.add(putUser(Integer.parseInt(productNumber), Integer.parseInt(amount)));
             }
         }
 
-        return price;
     }
 
     /**
-     * 상품번호 수량을 매계변수로 받아 최종금액을 계산
-     * 상품의 수량이 없을경우 soldOUtException 발생
-     * @return 최종금액
+     * 입력받은 상품번호와 수량을 저장
      */
-    public BigDecimal calculatePrice(int productNumber, int amount) throws SoldOutException {
-
-        orderService.findByAmount(productNumber,amount);
-        BigDecimal price = orderService.findById(productNumber);
-        log.debug("상품번호 : " + productNumber);
-        log.debug("상품금액 : " + price);
-        log.debug("수량 : " + amount);
-        return price.multiply(new BigDecimal(amount));
+    private ProductDto putUser(int productNumber, int amount){
+        ProductDto user = new ProductDto();
+        user.setProductNumber(productNumber);
+        user.setAmount(amount);
+        return user;
     }
 
     /**
-     * 최종금액 출력 메소드
+     * 주문 상품을 입력받아 상품명, 금액 처리
+     * 상품의 수량이 없을경우 soldOUtException 발생
+     */
+    public List<ProductDto> calculateOrders(List<ProductDto> orders) throws SoldOutException {
+        List<ProductDto> finalOrders = new ArrayList<>();
+        for(ProductDto order : orders) {
+            orderService.findByAmount(order.getProductNumber(), order.getAmount());
+            order.setProductName(orderService.findByProductName(order.getProductNumber()));
+            order.setPrice(orderService.findByPrice(order.getProductNumber()));
+            log.debug("상품번호 : " + order.getProductNumber());
+            log.debug("상품명 : " + order.getProductName());
+            log.debug("수량 : " + order.getAmount());
+            log.debug("금액 : " + order.getPrice());
+
+            finalOrders.add(order);
+        }
+        return finalOrders;
+    }
+
+    /**
+     * 최종주문 내역 출력 메소드
      * 최종금액이 5만원 미만일경우 배송료 추가
      */
-    public void calculateFinalPrice(BigDecimal price){
+    public void calculateFinalPrice(List<ProductDto> finalOrders){
         DecimalFormat formatter = new DecimalFormat("###,###");
-
+        BigDecimal price = BigDecimal.ZERO;
+        System.out.println("주문 내역:");
+        System.out.println("------------------------------------");
+        for(ProductDto order : finalOrders) {
+            System.out.printf("%s - %d개\n",order.getProductName(),order.getAmount());
+            price = price.add(order.getPrice().multiply(new BigDecimal(order.getAmount())));
+        }
+        System.out.println("------------------------------------");
         System.out.println("주문 금액 : " + formatter.format(price) + "원 ");
         if(new BigDecimal(50000).compareTo(price) > 0) {
             System.out.println("배송비 : 2,500원");
             price = price.add(new BigDecimal(2500));
         }
+        System.out.println("------------------------------------");
         System.out.println("지불 금액 : " + formatter.format(price) + "원");
+        System.out.println("------------------------------------");
 
     }
 

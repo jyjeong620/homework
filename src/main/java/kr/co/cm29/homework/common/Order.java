@@ -7,8 +7,7 @@ import kr.co.cm29.homework.exception.SoldOutException;
 import kr.co.cm29.homework.model.ProductDto;
 import kr.co.cm29.homework.repository.OrderRepository;
 
-import java.io.IOException;
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -32,14 +31,14 @@ public class Order {
         while(shopRunning){
             System.out.print("입력(o[order]: 주문, q[quit]: 종료) : ");
             String input = scan.nextLine();
-            BigDecimal price = BigDecimal.ZERO;
+            List<ProductDto> finalOrders = new ArrayList<>();
 
             if(input.equals("o")){
                 orderController.printAll();
                 try {
-                    price = orderController.findProductNumber();
-                    orderController.calculateFinalPrice(price);
-                } catch (SoldOutException e){
+                    finalOrders = orderController.findProductNumber();
+                    orderController.calculateFinalPrice(finalOrders);
+                } catch (SoldOutException e) {
                     e.printStackTrace();
                 }
             } else if(input.equals("q") || input.equals("quit")){

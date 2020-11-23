@@ -1,6 +1,7 @@
 package kr.co.cm29.homework.common;
 
 import kr.co.cm29.homework.model.ProductDto;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class DataSettingTest {
 
     @Test
+    @DisplayName("데이터 세팅 테스트")
     void setting() {
         //given
         DataSetting dataSetting = new DataSetting();

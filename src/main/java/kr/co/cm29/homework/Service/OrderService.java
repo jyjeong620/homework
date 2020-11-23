@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface OrderService {
     public List<ProductDto> findAllProduct();
-    public BigDecimal findById(int productNumber);
+    public BigDecimal findByPrice(int productNumber);
+    public String findByProductName(int productNumber);
     public void findByAmount(int productNumber, int amount) throws SoldOutException;
 }

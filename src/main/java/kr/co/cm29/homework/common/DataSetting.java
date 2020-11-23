@@ -15,6 +15,9 @@ import java.util.List;
 @Slf4j
 public class DataSetting {
 
+    /**
+     * 파일을 읽어와 데이터를 세팅하는 메소드
+     */
     public List<ProductDto> setting() throws IOException {
         List<ProductDto> product = new ArrayList<>();
         File file = new File("");

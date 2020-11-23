@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 class OrderControllerTest  {
@@ -36,35 +37,67 @@ class OrderControllerTest  {
     }
 
     @Test
-    void findProductNumber() {
+    @DisplayName("상품번호와 수량을 입력하여 주문")
+    void calculatePrice(){
+        //given
+        List<ProductDto> orders = new ArrayList<>();
+        ProductDto order = new ProductDto();
+        order.setProductNumber(778422);
+        order.setAmount(1);
+        orders.add(order);
+
         try {
-            orderController.findProductNumber();
+            orderController.calculateFinalPrice(orderController.calculateOrders(orders));
         } catch (SoldOutException e){
 
         }
     }
 
     @Test
-    void calculatePrice(){
-        try {
-            System.out.println("최종금액 : "+ orderController.calculatePrice(517643,2));
-        } catch (SoldOutException e){
-
+    void multiOrder() throws InterruptedException {
+//        calculatePrice();
+        MultiThread[] mt = new MultiThread[10];
+        for(int i = 0 ; i < 10 ; i++) {
+            mt[i] = new MultiThread();
+            mt[i].start();
+//            mt[i].sleep(10);
         }
     }
+
+    class MultiThread extends Thread{
+        @Override
+        public void run() {
+            calculatePrice();
+        }
+    }
+
     @Test
     @DisplayName("최종금액이 50000원 이하일경우 배송비 추가")
     void downFinalPrice() {
         //given
-        BigDecimal price = new BigDecimal(40000);
-        orderController.calculateFinalPrice(price);
+        List<ProductDto> orders = new ArrayList<>();
+        ProductDto order = new ProductDto();
+        order.setProductName("상품1");
+        order.setAmount(2);
+        order.setPrice(new BigDecimal(4000));
+        orders.add(order);
+
+        //when then
+        orderController.calculateFinalPrice(orders);
     }
 
     @Test
     @DisplayName("최종금액이 50000원 이상일경우")
     void upFinalPrice() {
         //given
-        BigDecimal price = new BigDecimal(70000);
-        orderController.calculateFinalPrice(price);
+        List<ProductDto> orders = new ArrayList<>();
+        ProductDto order = new ProductDto();
+        order.setProductName("상품1");
+        order.setAmount(2);
+        order.setPrice(new BigDecimal(40000));
+        orders.add(order);
+
+        //when then
+        orderController.calculateFinalPrice(orders);
     }
 }

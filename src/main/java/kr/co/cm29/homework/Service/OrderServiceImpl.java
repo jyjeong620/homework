@@ -26,9 +26,17 @@ public class OrderServiceImpl implements OrderService{
      * @param productNumber 상품번호
      * @return 판매가격
      */
-    @Override
-    public BigDecimal findById(int productNumber) {
-        return repository.findById(productNumber);
+    public BigDecimal findByPrice(int productNumber) {
+        return repository.findByPrice(productNumber);
+    }
+
+    /**
+     * 해당 상품번호의 상품명을 가져오는 메소드
+     * @param productNumber 상품번호
+     * @return 상품명
+     */
+    public String findByProductName(int productNumber){
+        return repository.findByProductName(productNumber);
     }
 
     /**
