@@ -15,23 +15,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 class OrderControllerTest  {
-
-//    OrderRepository orderRepository;
-//    OrderService orderService;
-//    OrderController orderController;
-//    List<ProductDto> productList;
     static OrderRunner order;
 
     @BeforeEach
     void BeforeAll() throws IOException {
-//        this.productList = DataSetting.getInstance().setting();
-//        this.orderRepository = OrderRepository.getInstance(this.productList);
-//        this.orderService = OrderServiceImpl.getInstance(this.orderRepository);
-//        this.orderController = OrderController.getInstance(this.orderService);
-        this.order = OrderRunner.getInstance();
+        order = OrderRunner.getInstance();
 
     }
 
@@ -44,7 +33,7 @@ class OrderControllerTest  {
 
     @Test
     @DisplayName("상품번호와 수량을 입력하여 주문")
-    void calculatePrice() throws IOException {
+    void calculatePrice() {
         //given
         List<ProductDto> orders = new ArrayList<>();
         ProductDto productOrder = new ProductDto();
@@ -68,11 +57,7 @@ class OrderControllerTest  {
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
         for (int i = 0; i < numberOfThreads; i++) {
             service.execute(() -> {
-                try {
-                    calculatePrice();
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                }
+                calculatePrice();
                 latch.countDown();
             });
         }
@@ -91,8 +76,7 @@ class OrderControllerTest  {
         orders.add(productDto);
 
         //when then
-        order.getOrderController().calculateFinalPrice(orders);
-//        orderController.calculateFinalPrice(orders);
+        order.getOrderController().printFinalProduct(orders);
     }
 
     @Test
@@ -107,7 +91,6 @@ class OrderControllerTest  {
         orders.add(productDto);
 
         //when then
-        order.getOrderController().calculateFinalPrice(orders);
-//        orderController.calculateFinalPrice(orders);
+        order.getOrderController().printFinalProduct(orders);
     }
 }

@@ -12,20 +12,19 @@ import java.util.List;
 import java.util.Scanner;
 
 @Slf4j
-public class OrderController {
-    private static OrderController instance;
+public class OrderControllerImpl implements OrderController{
+    private static OrderControllerImpl instance;
     private final OrderService orderService;
-    private Scanner scan;
 
-    private OrderController(OrderService orderService) {
+    private OrderControllerImpl(OrderService orderService) {
         this.orderService = orderService;
     }
 
-    public synchronized static OrderController getInstance(OrderService orderService){
-        if(OrderController.instance == null){
-            OrderController.instance = new OrderController(orderService);
+    public synchronized static OrderControllerImpl getInstance(OrderService orderService){
+        if(OrderControllerImpl.instance == null){
+            OrderControllerImpl.instance = new OrderControllerImpl(orderService);
         }
-        return OrderController.instance;
+        return OrderControllerImpl.instance;
     }
 
 
@@ -44,7 +43,7 @@ public class OrderController {
      */
     public void findProductNumber() throws SoldOutException{
         List<ProductDto> orders = new ArrayList<>();
-        this.scan = new Scanner(System.in);
+        Scanner scan = new Scanner(System.in);
         String productNumber;
         String amount;
         boolean isShopping = true;
@@ -58,6 +57,9 @@ public class OrderController {
                 calculateOrders(orders);
                 isShopping = false;
                 continue;
+            } else if(orderService.findByProductName(Integer.parseInt(productNumber)).equals("")){
+                System.out.println("입력하신 상품이 존재하지않습니다.");
+                continue;
             }
             System.out.print("수량 : ");
             amount = scan.nextLine();
@@ -69,11 +71,13 @@ public class OrderController {
                 orders.add(putUser(Integer.parseInt(productNumber), Integer.parseInt(amount)));
             }
         }
-
     }
 
     /**
      * 입력받은 상품번호와 수량을 저장
+     * @param productNumber 상품번호
+     * @param amount 상품수량
+     * @return 상품번호와 상품수량만 입력된 ProductDto 객체 return
      */
     private ProductDto putUser(int productNumber, int amount){
         ProductDto user = new ProductDto();
@@ -84,7 +88,10 @@ public class OrderController {
 
     /**
      * 주문 상품을 입력받아 상품명, 금액 처리
-     * 상품의 수량이 없을경우 soldOUtException 발생
+     * 상품의 수량이 없을경우 soldOutException 발생
+     * 멀티 thread 환경에서 동시에 메소드 호출시 순차적으로 처리하기위해 synchronized 처리
+     * @param orders 상품번호, 수량이 입력된 ProductDto List
+     * @throws SoldOutException 재고 부족시 처리
      */
     public synchronized void calculateOrders(List<ProductDto> orders) throws SoldOutException {
         List<ProductDto> finalOrders = new ArrayList<>();
@@ -99,14 +106,15 @@ public class OrderController {
 
             finalOrders.add(order);
         }
-        calculateFinalPrice(finalOrders);
+        printFinalProduct(finalOrders);
     }
 
     /**
      * 최종주문 내역 출력 메소드
      * 최종금액이 5만원 미만일경우 배송료 추가
+     * @param finalOrders 총 주문내역리스트
      */
-    public void calculateFinalPrice(List<ProductDto> finalOrders){
+    public void printFinalProduct(List<ProductDto> finalOrders){
         DecimalFormat formatter = new DecimalFormat("###,###");
         BigDecimal price = BigDecimal.ZERO;
         System.out.println("주문 내역:");
@@ -124,7 +132,5 @@ public class OrderController {
         System.out.println("------------------------------------");
         System.out.println("지불 금액 : " + formatter.format(price) + "원");
         System.out.println("------------------------------------");
-
     }
-
 }

@@ -2,7 +2,7 @@ package kr.co.cm29.homework.common;
 
 import kr.co.cm29.homework.Service.OrderService;
 import kr.co.cm29.homework.Service.OrderServiceImpl;
-import kr.co.cm29.homework.controller.OrderController;
+import kr.co.cm29.homework.controller.OrderControllerImpl;
 import kr.co.cm29.homework.exception.SoldOutException;
 import kr.co.cm29.homework.model.ProductDto;
 import kr.co.cm29.homework.repository.OrderRepository;
@@ -17,14 +17,14 @@ public class OrderRunner {
     private static OrderRunner instance;
     private final OrderRepository orderRepository;
     private final OrderService orderService;
-    private final OrderController orderController;
+    private final OrderControllerImpl orderController;
     private final List<ProductDto> productList;
 
     private OrderRunner() throws IOException{
         this.productList = DataSetting.getInstance().setting();
         this.orderRepository = OrderRepository.getInstance(this.productList);
         this.orderService = OrderServiceImpl.getInstance(this.orderRepository);
-        this.orderController = OrderController.getInstance(this.orderService);
+        this.orderController = OrderControllerImpl.getInstance(this.orderService);
     }
 
     public synchronized static OrderRunner getInstance() throws IOException{

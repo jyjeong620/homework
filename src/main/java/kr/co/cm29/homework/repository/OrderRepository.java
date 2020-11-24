@@ -61,6 +61,9 @@ public class OrderRepository {
 
     /**
      * 해당 상품의 재고 수량 빼기
+     * @param productNumber 상품번호
+     * @param amount 수량
+     * @throws SoldOutException 재고가 부족시 Exception
      */
     public void subAmount(int productNumber, int amount) throws SoldOutException{
         int finalAmount = 0;
