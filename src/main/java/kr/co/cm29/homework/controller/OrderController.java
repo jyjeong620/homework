@@ -3,7 +3,6 @@ package kr.co.cm29.homework.controller;
 import kr.co.cm29.homework.Service.OrderService;
 import kr.co.cm29.homework.exception.SoldOutException;
 import kr.co.cm29.homework.model.ProductDto;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
@@ -11,14 +10,24 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 @Slf4j
-@RequiredArgsConstructor
 public class OrderController {
+    private static OrderController instance;
     private final OrderService orderService;
+    private Scanner scan;
 
-    Scanner scan;
+    private OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    public synchronized static OrderController getInstance(OrderService orderService){
+        if(OrderController.instance == null){
+            OrderController.instance = new OrderController(orderService);
+        }
+        return OrderController.instance;
+    }
+
 
     /**
      * 모든 상품을 출력
@@ -33,22 +42,27 @@ public class OrderController {
     /**
      * 상품번호, 수량을 입력받아 해당 상품의 가격을 가져와 금액을 계산
      */
-    public List<ProductDto> findProductNumber() throws SoldOutException{
+    public void findProductNumber() throws SoldOutException{
         List<ProductDto> orders = new ArrayList<>();
-        scan = new Scanner(System.in);
+        this.scan = new Scanner(System.in);
         String productNumber;
         String amount;
+        boolean isShopping = true;
 
-        while(true){
+        while(isShopping){
             System.out.print("상품번호 : ");
             productNumber = scan.nextLine();
+
+            if(productNumber.equals(" ")){
+                log.debug("입력값 없음");
+                calculateOrders(orders);
+                isShopping = false;
+                continue;
+            }
             System.out.print("수량 : ");
             amount = scan.nextLine();
 
-            if(productNumber.equals(" ") && amount.equals(" ")){
-                log.debug("입력값 없음");
-                return calculateOrders(orders);
-            } else if(productNumber.isEmpty() || amount.isEmpty()
+            if(productNumber.isEmpty() || amount.isEmpty()
                     || !productNumber.matches("^[0-9]*$") || !amount.matches("^[0-9]*$")){
                 System.out.println("잘못입력하셨습니다.");
             } else {
@@ -72,7 +86,7 @@ public class OrderController {
      * 주문 상품을 입력받아 상품명, 금액 처리
      * 상품의 수량이 없을경우 soldOUtException 발생
      */
-    public List<ProductDto> calculateOrders(List<ProductDto> orders) throws SoldOutException {
+    public synchronized void calculateOrders(List<ProductDto> orders) throws SoldOutException {
         List<ProductDto> finalOrders = new ArrayList<>();
         for(ProductDto order : orders) {
             orderService.findByAmount(order.getProductNumber(), order.getAmount());
@@ -85,7 +99,7 @@ public class OrderController {
 
             finalOrders.add(order);
         }
-        return finalOrders;
+        calculateFinalPrice(finalOrders);
     }
 
     /**

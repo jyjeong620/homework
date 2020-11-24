@@ -1,14 +1,11 @@
 package kr.co.cm29.homework;
 
 
-import kr.co.cm29.homework.common.DataSetting;
-import kr.co.cm29.homework.common.Order;
-
-import java.util.OptionalDouble;
+import kr.co.cm29.homework.common.OrderRunner;
 
 public class Homework {
     public static void main(String[] args) throws Exception{
-        Order order = new Order();
+        OrderRunner order = OrderRunner.getInstance();
         order.run();
     }
 }

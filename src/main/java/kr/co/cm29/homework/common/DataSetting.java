@@ -15,8 +15,19 @@ import java.util.List;
 @Slf4j
 public class DataSetting {
 
+    private static DataSetting instance;
+
+    private DataSetting(){}
+
+    public synchronized static DataSetting getInstance(){
+        if(DataSetting.instance == null){
+            instance = new DataSetting();
+        }
+        return instance;
+    }
+
     /**
-     * 파일을 읽어와 데이터를 세팅하는 메소드
+     * 파일을 읽어와 상품 데이터를 세팅
      */
     public List<ProductDto> setting() throws IOException {
         List<ProductDto> product = new ArrayList<>();

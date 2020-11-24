@@ -8,11 +8,11 @@ import java.math.BigDecimal;
 @Getter @Setter
 public class ProductDto {
 
-    private int ProductNumber;
+    private int ProductNumber;  //상품번호
 
-    private String ProductName;
+    private String ProductName; //상품이름
 
-    private BigDecimal Price;
+    private BigDecimal Price;   //상품가격
 
-    private int Amount;
+    private int Amount;         //재고수량
 }

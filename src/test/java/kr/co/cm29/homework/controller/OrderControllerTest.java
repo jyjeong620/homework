@@ -1,11 +1,8 @@
 package kr.co.cm29.homework.controller;
 
-import kr.co.cm29.homework.Service.OrderService;
-import kr.co.cm29.homework.Service.OrderServiceImpl;
-import kr.co.cm29.homework.common.DataSetting;
+import kr.co.cm29.homework.common.OrderRunner;
 import kr.co.cm29.homework.exception.SoldOutException;
 import kr.co.cm29.homework.model.ProductDto;
-import kr.co.cm29.homework.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,61 +11,72 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OrderControllerTest  {
 
-    OrderRepository orderRepository;
-    OrderService orderService;
-    OrderController orderController;
-    List<ProductDto> productList;
+//    OrderRepository orderRepository;
+//    OrderService orderService;
+//    OrderController orderController;
+//    List<ProductDto> productList;
+    static OrderRunner order;
 
     @BeforeEach
-    void beforeEach() throws IOException {
-        this.productList = new DataSetting().setting();
-        this.orderRepository = new OrderRepository(this.productList);
-        this.orderService = new OrderServiceImpl(this.orderRepository);
-        this.orderController = new OrderController(this.orderService);
+    void BeforeAll() throws IOException {
+//        this.productList = DataSetting.getInstance().setting();
+//        this.orderRepository = OrderRepository.getInstance(this.productList);
+//        this.orderService = OrderServiceImpl.getInstance(this.orderRepository);
+//        this.orderController = OrderController.getInstance(this.orderService);
+        this.order = OrderRunner.getInstance();
+
     }
 
     @Test
     @DisplayName("모든 상품 출력")
     void printAll() {
-        orderController.printAll();
+//        orderController.printAll();
+        order.getOrderController().printAll();
     }
 
     @Test
     @DisplayName("상품번호와 수량을 입력하여 주문")
-    void calculatePrice(){
+    void calculatePrice() throws IOException {
         //given
         List<ProductDto> orders = new ArrayList<>();
-        ProductDto order = new ProductDto();
-        order.setProductNumber(778422);
-        order.setAmount(1);
-        orders.add(order);
+        ProductDto productOrder = new ProductDto();
+        productOrder.setProductNumber(778422);
+        productOrder.setAmount(1);
+        orders.add(productOrder);
 
         try {
-            orderController.calculateFinalPrice(orderController.calculateOrders(orders));
+            order.getOrderController().calculateOrders(orders);
+
         } catch (SoldOutException e){
 
         }
     }
 
     @Test
+    @DisplayName("멀티 쓰레드 환경에서 SoldOutException 처리 확인")
     void multiOrder() throws InterruptedException {
-//        calculatePrice();
-        MultiThread[] mt = new MultiThread[10];
-        for(int i = 0 ; i < 10 ; i++) {
-            mt[i] = new MultiThread();
-            mt[i].start();
-//            mt[i].sleep(10);
+        int numberOfThreads = 10;
+        ExecutorService service = Executors.newFixedThreadPool(10);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+        for (int i = 0; i < numberOfThreads; i++) {
+            service.execute(() -> {
+                try {
+                    calculatePrice();
+                } catch (IOException e) {
+                    System.out.println(e.getMessage());
+                }
+                latch.countDown();
+            });
         }
-    }
-
-    class MultiThread extends Thread{
-        @Override
-        public void run() {
-            calculatePrice();
-        }
+        latch.await();
     }
 
     @Test
@@ -76,14 +84,15 @@ class OrderControllerTest  {
     void downFinalPrice() {
         //given
         List<ProductDto> orders = new ArrayList<>();
-        ProductDto order = new ProductDto();
-        order.setProductName("상품1");
-        order.setAmount(2);
-        order.setPrice(new BigDecimal(4000));
-        orders.add(order);
+        ProductDto productDto = new ProductDto();
+        productDto.setProductName("상품1");
+        productDto.setAmount(2);
+        productDto.setPrice(new BigDecimal(4000));
+        orders.add(productDto);
 
         //when then
-        orderController.calculateFinalPrice(orders);
+        order.getOrderController().calculateFinalPrice(orders);
+//        orderController.calculateFinalPrice(orders);
     }
 
     @Test
@@ -91,13 +100,14 @@ class OrderControllerTest  {
     void upFinalPrice() {
         //given
         List<ProductDto> orders = new ArrayList<>();
-        ProductDto order = new ProductDto();
-        order.setProductName("상품1");
-        order.setAmount(2);
-        order.setPrice(new BigDecimal(40000));
-        orders.add(order);
+        ProductDto productDto = new ProductDto();
+        productDto.setProductName("상품1");
+        productDto.setAmount(2);
+        productDto.setPrice(new BigDecimal(40000));
+        orders.add(productDto);
 
         //when then
-        orderController.calculateFinalPrice(orders);
+        order.getOrderController().calculateFinalPrice(orders);
+//        orderController.calculateFinalPrice(orders);
     }
 }

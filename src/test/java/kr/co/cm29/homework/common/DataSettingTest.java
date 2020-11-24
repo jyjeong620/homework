@@ -17,7 +17,7 @@ class DataSettingTest {
     @DisplayName("데이터 세팅 테스트")
     void setting() {
         //given
-        DataSetting dataSetting = new DataSetting();
+        DataSetting dataSetting = DataSetting.getInstance();
         List<ProductDto> products = new ArrayList<>();
 
         //when

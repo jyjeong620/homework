@@ -3,14 +3,24 @@ package kr.co.cm29.homework.Service;
 import kr.co.cm29.homework.exception.SoldOutException;
 import kr.co.cm29.homework.model.ProductDto;
 import kr.co.cm29.homework.repository.OrderRepository;
-import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-@RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService{
+    private static OrderServiceImpl instance;
     private final OrderRepository repository;
+
+    private OrderServiceImpl(OrderRepository repository) {
+        this.repository = repository;
+    }
+
+    public synchronized static OrderServiceImpl getInstance(OrderRepository repository){
+        if(OrderServiceImpl.instance == null){
+            OrderServiceImpl.instance = new OrderServiceImpl(repository);
+        }
+        return OrderServiceImpl.instance;
+    }
 
     /**
      * Product 데이터를 모두 가져오는 메소드
