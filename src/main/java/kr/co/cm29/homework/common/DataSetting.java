@@ -10,6 +10,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -49,6 +51,7 @@ public class DataSetting {
             }
             product.add(dto);
         }
+        Collections.sort(product);
 
         return product;
     }

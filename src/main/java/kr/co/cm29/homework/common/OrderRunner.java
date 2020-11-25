@@ -50,7 +50,7 @@ public class OrderRunner {
                 try {
                     orderController.findProductNumber();
                 } catch (SoldOutException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             } else if(input.equalsIgnoreCase("q") || input.equalsIgnoreCase("quit")){
                 shopRunning = false;

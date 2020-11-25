@@ -71,7 +71,6 @@ public class OrderRepository {
             if(data.getProductNumber() == productNumber){
                 finalAmount = data.getAmount()- amount;
                 if(finalAmount < 0){
-                    log.error("재고수량 부족!!!!");
                     throw new SoldOutException();
                 } else {
                     log.debug("남은 재고수량 : " + finalAmount);
